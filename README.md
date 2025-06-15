@@ -1,0 +1,1 @@
+Simple Python Code to read a credit card statement and provide the spend analysis for categories such as Swiggy, Zomato and Blinkit. Often we find it hard to filter and extract this information from credit card statements. This code helped me to analyze the spends and optimize for future months.
