@@ -377,7 +377,12 @@ if __name__ == "__main__":
         
                 # Sort by amount descending and get top 15
                 top_spends = all_transactions_df.sort_values(by=amount_col, ascending=False).head(15)
-        
+
+                # Before preparing data for the table, format the date column
+                top_spends[date_col] = pd.to_datetime(
+                    top_spends[date_col], errors='coerce', dayfirst=True
+                ).dt.strftime('%d %b %Y')
+
                 # Prepare data for table
                 table_data = []
                 for _, row in top_spends.iterrows():
