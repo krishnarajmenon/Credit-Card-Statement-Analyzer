@@ -9,7 +9,7 @@ import plotly.graph_objects as go
 
 def analyze_credit_card_statement(pdf_path, password=None):
     """
-    Reads a Standard Chartered credit card statement PDF, extracts transactions,
+    Reads a credit card credit card statement PDF, extracts transactions,
     and calculates total spends for Swiggy, Zomato, and Blinkit.
 
     Args:
@@ -37,12 +37,12 @@ def analyze_credit_card_statement(pdf_path, password=None):
         # Concatenate all tables into a single DataFrame
         for table in tables:
             # Assuming the first row is the header, but you might need to adjust
-            # based on how your Standard Chartered statement is formatted.
+            # based on how your Credit card statement is formatted.
             # You might need to inspect tables[0].df to identify header rows and remove them.
             all_transactions_df = pd.concat([all_transactions_df, table.df], ignore_index=True)
 
         # Step 2: Clean and process the DataFrame
-        # Standard Chartered statements typically have columns like 'Date', 'Transaction Description', 'Amount' (or 'Debit/Credit')
+        # Credit card statements typically have columns like 'Date', 'Transaction Description', 'Amount' (or 'Debit/Credit')
         # You'll need to identify the correct column names from your actual statement.
         # Let's assume for now they are 'Transaction Description' and 'Amount'.
         # You might need to rename columns if Camelot extracts them differently.
@@ -61,7 +61,7 @@ def analyze_credit_card_statement(pdf_path, password=None):
         # You MUST inspect your actual statement's extracted data to get the correct column names.
         # For example, if it extracts as df[0], df[1], df[2], etc., you'll need to map them.
 
-        # **IMPORTANT: You need to inspect your actual Standard Chartered statement's raw output
+        # **IMPORTANT: You need to inspect your actual credit card statement's raw output
         # to correctly identify the columns for transaction description and amount.**
         # Print tables[0].df to see the raw extracted data.
 
@@ -121,7 +121,7 @@ def analyze_credit_card_statement(pdf_path, password=None):
         
         # THIS IS THE MOST CRITICAL PART - IDENTIFYING THE CORRECT COLUMNS.
         # You will likely have to run the `camelot.read_pdf` part and print `tables[0].df`
-        # to understand the exact column structure from your Standard Chartered statement.
+        # to understand the exact column structure from your credit card statement.
         # Once you know the column indices or names, you can uncomment and adapt the following:
 
         # Example of cleaning and preparing data (Highly dependent on actual statement format)
@@ -183,7 +183,7 @@ def analyze_credit_card_statement(pdf_path, password=None):
         all_transactions_df[amount_col] = all_transactions_df[amount_col].astype(str).str.replace(',', '').apply(pd.to_numeric, errors='coerce')
         all_transactions_df.dropna(subset=[amount_col], inplace=True) # Drop rows where amount couldn't be parsed
 
-        # Standard Chartered statements often have separate debit and credit columns,
+        # Credit Card statements often have separate debit and credit columns,
         # or a single amount column where debits are positive.
         # You'll need to verify how your statement presents spending (debits).
         # Assuming for now that the extracted 'Amount' column directly represents debits (spends).
@@ -222,7 +222,7 @@ def analyze_credit_card_statement(pdf_path, password=None):
 
 # --- How to use the program ---
 if __name__ == "__main__":
-    statements_folder = "./statements1" # Folder containing your PDF statements
+    statements_folder = os.path.abspath(os.path.join('..', 'statements1')) # Folder containing your PDF statements
     pdf_password = None # Set to None if not password protected
 
     monthly_spends_data = {} # To store {month_name: {category: spend}}
@@ -376,7 +376,6 @@ if __name__ == "__main__":
             else:
                 print("Could not find the PDF file for the last month.")
         
-        # ...existing code for summary table...
         print("\n--- Monthly Spends Summary ---")
         print(f"{'Month':<15} | {'Swiggy':<10} | {'Zomato':<10} | {'Blinkit':<10}")
         print("-" * 55)
@@ -385,107 +384,4 @@ if __name__ == "__main__":
             month_name = calendar.month_abbr[int(month_num_str)]
             spends = monthly_spends_data[month_key]
             print(f"{month_name} {year:<9} | {spends.get('Swiggy', 0):<10.2f} | {spends.get('Zomato', 0):<10.2f} | {spends.get('Blinkit', 0):<10.2f}")
-        # for month_key in sorted_months:
-        #     spends_for_month = monthly_spends_data[month_key]
-        #     print(f"Processing month: {month_key} with spends: {spends_for_month}")
-        #     # Extract full month name from the month key (e.g., "2025-01" -> "Jan")
-        #     # We already have month_number from parsing filename, let's use that for clarity
-        #     year, month_num_str = month_key.split('-')
-        #     month_name = calendar.month_abbr[int(month_num_str)] # Get 3-letter abbreviation for axis
-        #     display_months.append(f"{month_name} {year}") # e.g., "Jan 2025"
-
-        #     for category in categories:
-        #         category_spends_for_plotting[category].append(spends_for_month.get(category, 0)) # Use .get() to handle missing categories
-
-        # plt.figure(figsize=(12, 7)) # Adjust figure size as needed
-    
-        # for category in categories:
-        #     spends_list = category_spends_for_plotting[category]
-        #     if any(s > 0 for s in spends_list):
-        #         plt.plot(display_months, spends_list, marker='o', linestyle='-', label=category)
-        #     else:
-        #         print(f"No spends found for {category} across the analyzed months. Not including in combined plot.")
-
-        # plt.title('Monthly Spends by Category (Swiggy, Zomato, Blinkit)')
-        # plt.xlabel('Month')
-        # plt.ylabel('Spend (INR)')
-        # plt.grid(True)
-        # plt.xticks(rotation=45, ha='right')
-        # plt.legend(title="Category") # Add a legend to identify the lines
-        # plt.tight_layout()
-        # plt.show()
-
-        #         # ...existing code...
         
-        # # --- Show Top 15 Spends of the Last Month in a Grid ---
-        # if sorted_months:
-        #     last_month_key = sorted_months[-1]
-        #     last_month_filename = None
-        #     for filename in pdf_files:
-        #         match = filename_pattern.match(filename)
-        #         if match:
-        #             month_abbr = match.group(1)
-        #             year = match.group(2)
-        #             month_number = list(calendar.month_abbr).index(month_abbr.capitalize())
-        #             month_key = f"{year}-{month_number:02d}"
-        #             if month_key == last_month_key:
-        #                 last_month_filename = filename
-        #                 break
-        
-        #     if last_month_filename:
-        #         pdf_file_path = os.path.join(statements_folder, last_month_filename)
-        #         tables = camelot.read_pdf(pdf_file_path, pages='1-2', flavor='lattice', password=pdf_password)
-        #         all_transactions_df = pd.DataFrame()
-        #         for table in tables:
-        #             all_transactions_df = pd.concat([all_transactions_df, table.df], ignore_index=True)
-        #         all_transactions_df.dropna(subset=[all_transactions_df.columns[0]], inplace=True)
-        
-        #         # Infer columns as before
-        #         description_col = all_transactions_df.columns[1]
-        #         amount_col = all_transactions_df.columns[6]
-        #         for col_name in all_transactions_df.columns:
-        #             sample_data = all_transactions_df[col_name].astype(str).str.upper().str.strip()
-        #             if any("SWIGGY" in s or "ZOMATO" in s or "BLINKIT" in s for s in sample_data):
-        #                 description_col = col_name
-        #             try:
-        #                 numeric_series = all_transactions_df[col_name].astype(str).str.replace(',', '').apply(pd.to_numeric, errors='coerce')
-        #                 if numeric_series.count() / len(numeric_series) > 0.7:
-        #                     amount_col = col_name
-        #             except Exception:
-        #                 pass
-        
-        #         all_transactions_df[amount_col] = all_transactions_df[amount_col].astype(str).str.replace(',', '').apply(pd.to_numeric, errors='coerce')
-        #         all_transactions_df.dropna(subset=[amount_col], inplace=True)
-        
-        #         # Sort by amount descending and get top 15
-        #         top_spends = all_transactions_df.sort_values(by=amount_col, ascending=False).head(15)
-        
-        #         # Prepare data for table
-        #         table_data = []
-        #         for _, row in top_spends.iterrows():
-        #             desc = str(row[description_col])[:50]
-        #             amt = f"{row[amount_col]:,.2f}"
-        #             table_data.append([desc, amt])
-        
-        #         fig = go.Figure(data=[go.Table(
-        #             header=dict(values=["Description", "Amount (INR)"], fill_color='paleturquoise', align='left'),
-        #             cells=dict(values=[top_spends[description_col].astype(str).str[:50], 
-        #                             top_spends[amount_col].map('{:,.2f}'.format)],
-        #                     fill_color='lavender', align='left'))
-        #         ])
-        #         fig.update_layout(width=1000, height=40*len(top_spends)+100, title="Top 15 Spends")
-        #         fig.show()
-        #     else:
-        #         print("Could not find the PDF file for the last month.")
-        
-        # # ...existing code...
-
-        # print("\n--- Monthly Spends Summary ---")
-        # # Print a summary table
-        # print(f"{'Month':<15} | {'Swiggy':<10} | {'Zomato':<10} | {'Blinkit':<10}")
-        # print("-" * 55)
-        # for month_key in sorted_months:
-        #     year, month_num_str = month_key.split('-')
-        #     month_name = calendar.month_abbr[int(month_num_str)]
-        #     spends = monthly_spends_data[month_key]
-        #     print(f"{month_name} {year:<9} | {spends.get('Swiggy', 0):<10.2f} | {spends.get('Zomato', 0):<10.2f} | {spends.get('Blinkit', 0):<10.2f}")
