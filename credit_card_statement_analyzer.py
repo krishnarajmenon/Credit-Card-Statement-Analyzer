@@ -157,6 +157,16 @@ def analyze_credit_card_statement(pdf_path, password=None):
         # Let's try to infer columns if not explicitly named by Camelot
         description_col = all_transactions_df.columns[1]
         amount_col = all_transactions_df.columns[6]
+        date_col = all_transactions_df.columns[0]  # Default to first column
+
+        # Try to find date column (format: dd/mm/yyyy or dd-mm-yyyy)
+        date_pattern = re.compile(r'\d{2}[-/]\d{2}[-/]\d{4}')
+        for col_name in all_transactions_df.columns:
+            sample_data = all_transactions_df[col_name].astype(str).str.strip()
+            date_matches = sample_data.apply(lambda x: bool(date_pattern.match(x)))
+            if date_matches.sum() / len(sample_data) > 0.5:
+                date_col = col_name
+                break
 
         # Heuristic: Find a column that contains text that looks like a description (mix of letters and numbers)
         # and another that looks like an amount (mostly numbers, potentially with decimal/comma)
@@ -341,6 +351,16 @@ if __name__ == "__main__":
                 # Infer columns as before
                 description_col = all_transactions_df.columns[1]
                 amount_col = all_transactions_df.columns[6]
+                date_col = all_transactions_df.columns[0]
+                date_pattern = re.compile(r'\d{2}[-/]\d{2}[-/]\d{4}')
+                
+                for col_name in all_transactions_df.columns:
+                    sample_data = all_transactions_df[col_name].astype(str).str.strip()
+                    date_matches = sample_data.apply(lambda x: bool(date_pattern.match(x)))
+                    if date_matches.sum() / len(sample_data) > 0.5:
+                        date_col = col_name
+                        break
+                
                 for col_name in all_transactions_df.columns:
                     sample_data = all_transactions_df[col_name].astype(str).str.upper().str.strip()
                     if any("SWIGGY" in s or "ZOMATO" in s or "BLINKIT" in s for s in sample_data):
@@ -366,10 +386,13 @@ if __name__ == "__main__":
                     table_data.append([desc, amt])
         
                 fig = go.Figure(data=[go.Table(
-                    header=dict(values=["Description", "Amount (INR)"], fill_color='paleturquoise', align='left'),
-                    cells=dict(values=[top_spends[description_col].astype(str).str[:50], 
-                                    top_spends[amount_col].map('{:,.2f}'.format)],
-                            fill_color='lavender', align='left'))
+                    header=dict(values=["Date", "Description", "Amount (INR)"], fill_color='paleturquoise', align='left'),
+                    cells=dict(values=[
+                        top_spends[date_col].astype(str),
+                        top_spends[description_col].astype(str).str[:50],
+                        top_spends[amount_col].map('{:,.2f}'.format)
+                    ],
+                    fill_color='lavender', align='left'))
                 ])
                 fig.update_layout(width=1000, height=40*len(top_spends)+100, title="Top 15 Spends")
                 fig.show()
